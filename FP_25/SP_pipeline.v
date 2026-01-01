@@ -78,26 +78,13 @@ end
 wire [6:0] opcode, funct;
 wire [4:0] rs, rt, rd, shamt;
 wire [15:0] immediate;
-always @(*) begin
-	if (in_valid_IF) begin
-		opcode = inst[31:26];
-		rs = inst[25:21];
-		rt = inst[20:16];
-		rd = inst[15:11];
-		shamt = inst[10:6];
-		funct = inst[5:0];
-		immediate = inst[15:0];
-	end
-	else begin
-		opcode = 0;
-		rs = 0;
-		rt = 0;
-		rd = 0;
-		shamt = 0;
-		funct = 0;
-		immediate = 0;
-	end
-end
+assign opcode = inst[31:26];
+assign rs = inst[25:21];
+assign rt =  inst[20:16];
+assign rd = inst[15:11];
+assign shamt = inst[10:6];
+assign funct = inst[5:0];
+assign immediate = inst[15:0];
 
 //ID stage
 reg signed [31:0] op1_reg, op2_reg;
