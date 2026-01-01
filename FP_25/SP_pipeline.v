@@ -192,7 +192,7 @@ end
 assign sign_ex_imm_reg = {{16{immediate[15]}}, immediate};
 assign zero_ex_imm_reg = {16'b0, immediate};
 assign upper_ex_imm_reg = {immediate, 16'b0};
-assign mem_addr_reg = op1 + sign_ex_imm_reg;
+assign mem_addr_reg = op1_reg + sign_ex_imm_reg;
 
 //ID/EX register
 reg signed [31:0] op1, op2;
