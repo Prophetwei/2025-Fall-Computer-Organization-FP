@@ -283,7 +283,7 @@ always @(posedge clk or negedge rst_n) begin
 	else if (in_valid_MEM) begin
 		ALUresult_mem <= ALUresult;
 		dst_mem <= dst_reg;
-		mem_din <= ALUresult;
+		mem_din <= op2;
 		mem_wen <= mem_wen_reg;
 		memread <= memread_reg;
 	end
