@@ -87,7 +87,7 @@ assign funct_reg = inst[5:0];
 assign immediate_reg = inst[15:0];
 
 //IF/ID register
-reg [6:0] opcode, funct;
+reg [5:0] opcode, funct;
 reg [4:0] rs, rt, rd, shamt;
 reg [15:0] immediate;
 always @(posedge clk or negedge rst_n) begin
