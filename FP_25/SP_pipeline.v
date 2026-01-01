@@ -46,8 +46,10 @@ reg in_valid_IF, in_valid_ID, in_valid_EX, in_valid_MEM, in_valid_WB;
 //==============================================//
 //                  design                      //
 //==============================================//
+reg in_valid_inst;
 always @(posedge clk or negedge rst_n) begin
 	if(!rst_n) begin
+		in_valid_inst <= 0;
 		in_valid_IF <= 1'b0;
 		in_valid_ID <= 1'b0;
 		in_valid_EX <= 1'b0;
@@ -56,7 +58,8 @@ always @(posedge clk or negedge rst_n) begin
 		out_valid <= 1'b0;
 	end
 	else begin
-		in_valid_IF <= in_valid;
+		in_valid_inst <= in_valid;
+		in_valid_IF <= in_valid_inst;
 		in_valid_ID <= in_valid_IF;
 		in_valid_EX <= in_valid_ID;
 		in_valid_MEM <= in_valid_EX;
@@ -108,7 +111,7 @@ wire signed [31:0] sign_ex_imm_reg;
 wire        [31:0] zero_ex_imm_reg;
 wire        [31:0] upper_ex_imm_reg;
 
-always @() begin
+always @(*) begin
 	case(rs)
 		5'b00000: op1_reg = r[0];
 		5'b00001: op1_reg = r[1];
@@ -231,7 +234,7 @@ assign readmem_reg = (opcode_ex == 6'd5);
 assign writemem_reg = !(opcode_ex == 6'd6);
 assign writereg_reg = (opcode_ex != 6'd5) && (opcode_ex != 6'd6);
 
-always @() begin
+always @(*) begin
 	if (opcode_ex == 0) begin
 		case(funct)
 			6'd0: ALUresult = op1 & op2;
@@ -295,9 +298,9 @@ reg signed [31:0] read_data;
 reg signed [31:0] ALUresult_wb;
 reg        [4:0]  dst_wb;
 reg               writereg_wb;
-reg	readmem_wb
+reg	   			  readmem_wb;
 
-always @(posedge or negedge rst_n) begin
+always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
 		read_data <= 0;
 		ALUresult_wb <= 0;
@@ -317,9 +320,14 @@ end
 //WB stage
 wire signed [31:0] write_data;
 
-assign write_data = (readmem_reg) ? read_data : ALUresult_wb;
-always @() begin
-	if (writereg_wb) begin
+assign write_data = (readmem_wb) ? read_data : ALUresult_wb;
+always @(posedge clk or negedge rst_n) begin
+	if (!rst_n) begin
+		for (integer i = 0; i < 32; i = i + 1) begin
+			r[i] <= 32'b0;
+		end
+	end
+	else if (in_valid_WB & writereg_wb) begin
 		case(dst_wb)
 			5'b00000: r[0] = write_data;
 			5'b00001: r[1] = write_data;
