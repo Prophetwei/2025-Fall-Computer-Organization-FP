@@ -116,7 +116,6 @@ reg signed [31:0] op1_reg, op2_reg;
 wire signed [31:0] sign_ex_imm_reg;
 wire        [31:0] zero_ex_imm_reg;
 wire        [31:0] upper_ex_imm_reg;
-wire signed [31:0] mem_addr_reg;
 
 always @(*) begin
 	case(rs)
@@ -192,8 +191,10 @@ end
 assign sign_ex_imm_reg = {{16{immediate[15]}}, immediate};
 assign zero_ex_imm_reg = {16'b0, immediate};
 assign upper_ex_imm_reg = {immediate, 16'b0};
-assign mem_addr_reg = op1_reg + sign_ex_imm_reg;
-
+always @(*) begin
+	if (in_valid_EX) mem_addr = op1 + sign_ex_imm_reg;
+	else mem_addr = 12'b0;
+end
 //ID/EX register
 reg signed [31:0] op1, op2;
 reg        [5:0]  opcode_ex, funct_ex;
@@ -215,7 +216,6 @@ always @(posedge clk or negedge rst_n) begin
 		rt_ex <= 0;
 		rd_ex <= 0;
 		shamt_ex <= 0;
-		mem_addr <= 0;
 	end
 	else if (in_valid_EX) begin
 		op1 <= op1_reg;
@@ -228,7 +228,6 @@ always @(posedge clk or negedge rst_n) begin
 		rt_ex <= rt;
 		rd_ex <= rd;
 		shamt_ex <= shamt;
-		mem_addr <= mem_addr_reg[11:0];
 	end
 end
 
