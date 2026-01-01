@@ -75,6 +75,9 @@ end
 
 
 //IF stage
+wire [6:0] opcode, funct;
+wire [4:0] rs, rt, rd, shamt;
+wire [15:0] immediate;
 always @(*) begin
 	if (in_valid_IF) begin
 		opcode = inst[31:26];
