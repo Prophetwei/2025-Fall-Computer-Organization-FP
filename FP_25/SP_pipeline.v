@@ -189,7 +189,7 @@ always @(posedge clk or negedge rst_n) begin
 		rd_ex <= 0;
 		shamt_ex <= 0;
 	end
-	else if (in_valid_EX) begin
+	else if (in_valid_ID) begin
 		op1 <= op1_reg;
 		op2 <= op2_reg;
 		opcode_ex <= opcode;
@@ -258,7 +258,7 @@ always @(posedge clk or negedge rst_n) begin
 		mem_din <= 0;
 		mem_wen <= 1;
 	end
-	else if (in_valid_MEM) begin
+	else if (in_valid_EX) begin
 		ALUresult_mem <= ALUresult;
 		dst_mem <= dst_reg;
 		readmem <= readmem_reg;
@@ -289,7 +289,7 @@ always @(posedge clk or negedge rst_n) begin
 		writereg_wb <= 0;
 		readmem_wb <= 0;
 	end
-	else if (in_valid_WB) begin
+	else if (in_valid_MEM) begin
 		read_data <= read_data_reg;
 		ALUresult_wb <= ALUresult_mem;
 		dst_wb <= dst_mem;
