@@ -186,15 +186,14 @@ always @(*) begin
 		5'b11110: op2_reg = r[30];
 		5'b11111: op2_reg = r[31];
 	endcase
+	if (in_valid_EX) mem_addr = op1 + sign_ex_imm_reg;
+	else mem_addr = 12'b0;
 end
 
 assign sign_ex_imm_reg = {{16{immediate[15]}}, immediate};
 assign zero_ex_imm_reg = {16'b0, immediate};
 assign upper_ex_imm_reg = {immediate, 16'b0};
-always @(*) begin
-	if (in_valid_EX) mem_addr = op1 + sign_ex_imm_reg;
-	else mem_addr = 12'b0;
-end
+
 //ID/EX register
 reg signed [31:0] op1, op2;
 reg        [5:0]  opcode_ex, funct_ex;
