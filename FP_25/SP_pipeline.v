@@ -75,28 +75,24 @@ end
 
 
 //IF stage
-reg [5:0]  opcode, funct;
-reg [4:0]  rs, rt, rd, shamt;
-reg [15:0] immediate;
-reg [31:0] inst_reg;
-always @(posedge clk or negedge rst_n) begin
-	if(!rst_n) begin
-		opcode <= 0;
-		funct <= 0;
-		rs <= 0;
-		rt <= 0;
-		rd <= 0;
-		shamt <= 0;
-		immediate <= 0;
+always @(*) begin
+	if (in_valid_IF) begin
+		opcode = inst[31:26];
+		rs = inst[25:21];
+		rt = inst[20:16];
+		rd = inst[15:11];
+		shamt = inst[10:6];
+		funct = inst[5:0];
+		immediate = inst[15:0];
 	end
-	else if(in_valid_ID) begin
-		opcode <= inst[31:26];
-		funct <= inst[5:0];
-		rs <= inst[25:21];
-		rt <= inst[20:16];
-		rd <= inst[15:11];
-		shamt <= inst[10:6];
-		immediate <= inst[15:0];
+	else begin
+		opcode = 0;
+		rs = 0;
+		rt = 0;
+		rd = 0;
+		shamt = 0;
+		funct = 0;
+		immediate = 0;
 	end
 end
 
