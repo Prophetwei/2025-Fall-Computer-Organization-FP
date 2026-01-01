@@ -67,11 +67,9 @@ end
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
 		inst_addr <= 0;
-		inst_reg <= 0;
 	end
 	else if (in_valid) begin
 		inst_addr <= inst_addr + 1;
-		inst_reg <= inst;
 	end
 end
 
@@ -92,13 +90,13 @@ always @(posedge clk or negedge rst_n) begin
 		immediate <= 0;
 	end
 	else if(in_valid_ID) begin
-		opcode <= inst_reg[31:26];
-		funct <= inst_reg[5:0];
-		rs <= inst_reg[25:21];
-		rt <= inst_reg[20:16];
-		rd <= inst_reg[15:11];
-		shamt <= inst_reg[10:6];
-		immediate <= inst_reg[15:0];
+		opcode <= inst[31:26];
+		funct <= inst[5:0];
+		rs <= inst[25:21];
+		rt <= inst[20:16];
+		rd <= inst[15:11];
+		shamt <= inst[10:6];
+		immediate <= inst[15:0];
 	end
 end
 
