@@ -186,7 +186,7 @@ always @(*) begin
 		5'b11110: op2_reg = r[30];
 		5'b11111: op2_reg = r[31];
 	endcase
-	if (in_valid_EX) mem_addr = op1 + sign_ex_imm_reg;
+	if (in_valid_EX) mem_addr = op1_reg + sign_ex_imm_reg;
 	else mem_addr = 12'b0;
 end
 
