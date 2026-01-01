@@ -296,12 +296,8 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 //MEM stage
-wire signed [31:0] read_data_reg;
-
-assign read_data_reg = (readmem) ? mem_dout : 0;
 
 //MEM/WB register
-reg signed [31:0] read_data;
 reg signed [31:0] ALUresult_wb;
 reg        [4:0]  dst_wb;
 reg               writereg_wb;
@@ -309,14 +305,12 @@ reg	   			  readmem_wb;
 
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
-		read_data <= 0;
 		ALUresult_wb <= 0;
 		dst_wb <= 0;
 		writereg_wb <= 0;
 		readmem_wb <= 0;
 	end
 	else if (in_valid_WB) begin
-		read_data <= read_data_reg;
 		ALUresult_wb <= ALUresult_mem;
 		dst_wb <= dst_mem;
 		writereg_wb <= writereg;
@@ -327,7 +321,7 @@ end
 //WB stage
 wire signed [31:0] write_data;
 
-assign write_data = (readmem_wb) ? read_data : ALUresult_wb;
+assign write_data = (readmem_wb) ? mem_dout : ALUresult_mem;
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
 		for (integer i = 0; i < 32; i = i + 1) begin
