@@ -75,16 +75,41 @@ end
 
 
 //IF stage
-wire [6:0] opcode, funct;
-wire [4:0] rs, rt, rd, shamt;
-wire [15:0] immediate;
-assign opcode = inst[31:26];
-assign rs = inst[25:21];
-assign rt =  inst[20:16];
-assign rd = inst[15:11];
-assign shamt = inst[10:6];
-assign funct = inst[5:0];
-assign immediate = inst[15:0];
+wire [6:0] opcode_reg, funct_reg;
+wire [4:0] rs_reg, rt_reg, rd_reg, shamt_reg;
+wire [15:0] immediate_reg;
+assign opcode_reg = inst[31:26];
+assign rs_reg = inst[25:21];
+assign rt_reg =  inst[20:16];
+assign rd_reg = inst[15:11];
+assign shamt_reg = inst[10:6];
+assign funct_reg = inst[5:0];
+assign immediate_reg = inst[15:0];
+
+//IF/ID register
+reg [6:0] opcode, funct;
+reg [4:0] rs, rt, rd, shamt;
+reg [15:0] immediate;
+always @(posedge clk or negedge rst_n) begin
+	if (!rst_n) begin
+		opcode <= 0;
+		funct <= 0;
+		rs <= 0;
+		rt <= 0;
+		rd <= 0;
+		shamt <= 0;
+		immediate <= 0;
+	end
+	else if (in_valid_IF) begin
+		opcode <= opcode_reg;
+		funct <= funct_reg;
+		rs <= rs_reg;
+		rt <= rt_reg;
+		rd <= rd_reg;
+		shamt <= shamt_reg;
+		immediate <= immediate_reg;
+	end
+end
 
 //ID stage
 reg signed [31:0] op1_reg, op2_reg;
@@ -212,7 +237,9 @@ wire              writereg_reg;
 
 assign dst_reg = (opcode_ex == 0) ? rd_ex : rt_ex;
 assign readmem_reg = (opcode_ex == 6'd5);
-assign writemem_reg = !(opcode_ex == 6'd6);
+assign mem_wen = !(opcode_ex == 6'd6);
+assign mem_addr = ALUresult[11:0];
+assign mem_din = ALUresult;
 assign writereg_reg = (opcode_ex != 6'd6);
 
 always @(*) begin
@@ -254,18 +281,12 @@ always @(posedge clk or negedge rst_n) begin
 		dst_mem <= 0;
 		readmem <= 0;
 		writereg <= 0;
-		mem_addr <= 0;
-		mem_din <= 0;
-		mem_wen <= 1;
 	end
 	else if (in_valid_EX) begin
 		ALUresult_mem <= ALUresult;
 		dst_mem <= dst_reg;
 		readmem <= readmem_reg;
 		writereg <= writereg_reg;
-		mem_addr <= ALUresult;
-		mem_din <= ALUresult;
-		mem_wen <= writemem_reg;
 	end
 end
 
