@@ -205,7 +205,7 @@ always @(posedge clk or negedge rst_n) begin
 		rd_ex <= 0;
 		shamt_ex <= 0;
 	end
-	else if (in_valid_ex) begin
+	else if (in_valid_EX) begin
 		op1 <= op1_reg;
 		op2 <= op2_reg;
 		opcode_ex <= opcode;
