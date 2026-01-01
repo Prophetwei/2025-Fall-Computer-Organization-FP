@@ -46,10 +46,8 @@ reg in_valid_IF, in_valid_ID, in_valid_EX, in_valid_MEM, in_valid_WB;
 //==============================================//
 //                  design                      //
 //==============================================//
-reg in_valid_inst;
 always @(posedge clk or negedge rst_n) begin
 	if(!rst_n) begin
-		in_valid_inst <= 0;
 		in_valid_IF <= 1'b0;
 		in_valid_ID <= 1'b0;
 		in_valid_EX <= 1'b0;
@@ -58,8 +56,7 @@ always @(posedge clk or negedge rst_n) begin
 		out_valid <= 1'b0;
 	end
 	else begin
-		in_valid_inst <= in_valid;
-		in_valid_IF <= in_valid_inst;
+		in_valid_IF <= in_valid;
 		in_valid_ID <= in_valid_IF;
 		in_valid_EX <= in_valid_ID;
 		in_valid_MEM <= in_valid_EX;
@@ -94,7 +91,7 @@ always @(posedge clk or negedge rst_n) begin
 		shamt <= 0;
 		immediate <= 0;
 	end
-	else if(in_valid_IF) begin
+	else if(in_valid_ID) begin
 		opcode <= inst_reg[31:26];
 		funct <= inst_reg[5:0];
 		rs <= inst_reg[25:21];
@@ -208,7 +205,7 @@ always @(posedge clk or negedge rst_n) begin
 		rd_ex <= 0;
 		shamt_ex <= 0;
 	end
-	else if (in_valid_ID) begin
+	else if (in_valid_ex) begin
 		op1 <= op1_reg;
 		op2 <= op2_reg;
 		opcode_ex <= opcode;
@@ -224,15 +221,15 @@ end
 
 //EX stage
 reg signed [31:0] ALUresult;
-wire       [4:0]  dst_ex;
+wire       [4:0]  dst_reg;
 wire              readmem_reg;
 wire              writemem_reg;
 wire              writereg_reg;
 
-assign dst_ex = (opcode_ex == 0) ? rd_ex : rt_ex;
+assign dst_reg = (opcode_ex == 0) ? rd_ex : rt_ex;
 assign readmem_reg = (opcode_ex == 6'd5);
 assign writemem_reg = !(opcode_ex == 6'd6);
-assign writereg_reg = (opcode_ex != 6'd5) && (opcode_ex != 6'd6);
+assign writereg_reg = (opcode_ex != 6'd6);
 
 always @(*) begin
 	if (opcode_ex == 0) begin
@@ -277,9 +274,9 @@ always @(posedge clk or negedge rst_n) begin
 		mem_din <= 0;
 		mem_wen <= 1;
 	end
-	else if (in_valid_EX) begin
+	else if (in_valid_MEM) begin
 		ALUresult_mem <= ALUresult;
-		dst_mem <= dst_ex;
+		dst_mem <= dst_reg;
 		readmem <= readmem_reg;
 		writereg <= writereg_reg;
 		mem_addr <= ALUresult;
@@ -308,7 +305,7 @@ always @(posedge clk or negedge rst_n) begin
 		writereg_wb <= 0;
 		readmem_wb <= 0;
 	end
-	else if (in_valid_MEM) begin
+	else if (in_valid_WB) begin
 		read_data <= read_data_reg;
 		ALUresult_wb <= ALUresult_mem;
 		dst_wb <= dst_mem;
@@ -327,7 +324,7 @@ always @(posedge clk or negedge rst_n) begin
 			r[i] <= 32'b0;
 		end
 	end
-	else if (in_valid_WB & writereg_wb) begin
+	else if (writereg_wb) begin
 		case(dst_wb)
 			5'b00000: r[0] = write_data;
 			5'b00001: r[1] = write_data;
