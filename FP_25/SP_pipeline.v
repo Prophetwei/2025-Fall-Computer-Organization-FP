@@ -186,8 +186,16 @@ always @(*) begin
 		5'b11110: op2_reg = r[30];
 		5'b11111: op2_reg = r[31];
 	endcase
-	if (in_valid_EX) mem_addr = op1_reg + sign_ex_imm_reg;
-	else mem_addr = 12'b0;
+	if (in_valid_EX) begin
+		mem_addr = op1_reg + sign_ex_imm_reg;
+		mem_din = op2_reg;
+		mem_wen = (opcode == 6'd6) ? 1'b0 : 1'b1;
+	end
+	else begin
+		mem_addr = 12'b0;
+		mem_din = 32'b0;
+		mem_wen = 1'b1;
+	end
 end
 
 assign sign_ex_imm_reg = {{16{immediate[15]}}, immediate};
@@ -237,7 +245,7 @@ wire              mem_wen_reg;
 wire              memread_reg;
 
 assign dst_reg = (opcode_ex == 0) ? rd_ex : rt_ex;
-assign mem_wen_reg = (opcode_ex == 6'd6) ? 1'b0 : 1'b1;
+assign memwrite_reg = (opcode_ex == 6'd6) ? 1'b0 : 1'b1;
 assign memread_reg = (opcode_ex == 6'd5) ? 1'b1 : 1'b0;
 
 always @(*) begin
@@ -270,21 +278,19 @@ end
 //EX/MEM register
 reg signed [31:0] ALUresult_mem;
 reg        [4:0]  dst_mem;
-reg               memread;
+reg               memread, memwrite;
 
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
 		ALUresult_mem <= 0;
 		dst_mem <= 0;
-		mem_din <= 0;
-		mem_wen <= 1;
+		memwrite <= 1;
 		memread <= 0;
 	end
 	else if (in_valid_MEM) begin
 		ALUresult_mem <= ALUresult;
 		dst_mem <= dst_reg;
-		mem_din <= op2;
-		mem_wen <= mem_wen_reg;
+		memwrite <= memwrite_reg;
 		memread <= memread_reg;
 	end
 end
@@ -301,7 +307,7 @@ always @(posedge clk or negedge rst_n) begin
 			r[i] <= 32'b0;
 		end
 	end
-	else if (mem_wen) begin
+	else if (memwrite) begin
 		case(dst_mem)
 			5'b00000: r[0] = write_data;
 			5'b00001: r[1] = write_data;
